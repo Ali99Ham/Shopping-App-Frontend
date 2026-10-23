@@ -1,12 +1,12 @@
 "use client";
-
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { cn } from "cn";
 import { API_URL } from "@/constant";
-import { getErrorMsg } from "@/utlis/error";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import Axios from "@/lib/axios";
+import { getErrorMsg } from "@/utlis/error";
 
 type SignUpFormData = {
   email: string;
@@ -17,26 +17,21 @@ export default function SignUp() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<SignUpFormData>();
   const router = useRouter();
-  const [errorFromServer, setErrorFromServer] = useState("");
 
-  const onSubmit = async (data: SignUpFormData) => {
-    setErrorFromServer("");
-    const res = await fetch(`${API_URL}/users/new`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-    const result = await res.json();
-    if (!res.ok) {
-      setErrorFromServer(getErrorMsg(result));
-      return;
-    }
-    router.replace("/");
+  const { mutate, error, isPending } = useMutation({
+    mutationFn: (data: SignUpFormData) =>
+      Axios.post(`${API_URL}/users/new`, data),
+    onSuccess: () => {
+      router.replace("/login");
+    },
+    onError: () => {},
+  });
+
+  const onSubmit = (data: SignUpFormData) => {
+    mutate(data);
   };
 
   return (
@@ -60,7 +55,7 @@ export default function SignUp() {
               autoComplete="email"
               className={cn(
                 "w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100",
-                { "border-red-500": !!errors.email || !!errorFromServer },
+                { "border-red-500": !!errors.email || !!error?.message },
               )}
               {...register("email", {
                 required: "Email is required",
@@ -89,7 +84,7 @@ export default function SignUp() {
               autoComplete="new-password"
               className={cn(
                 "w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100",
-                { "border-red-500": !!errors.password || !!errorFromServer },
+                { "border-red-500": !!errors.password || !!error?.message },
               )}
               {...register("password", {
                 required: "Password is required",
@@ -105,14 +100,14 @@ export default function SignUp() {
 
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isPending}
             className="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? "Sending..." : "Sign Up"}
+            {isPending ? "Sending..." : "Sign Up"}
           </button>
-          {!!errorFromServer && (
+          {!!error && (
             <p className="text-sm font-semibold text-red-500">
-              {errorFromServer}
+              {getErrorMsg(error)}
             </p>
           )}
         </form>
