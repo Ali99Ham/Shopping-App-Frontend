@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export function getErrorMsg(error: any) {
-  if (error?.response && error?.response?.data) {
+export function getErrorMsg(error: string | string[] | undefined) {
+  console.log("e", error);
+  if (error) {
     console.log("ee", error);
-    if (Array.isArray(error.response?.data?.message))
-      return formatErrorMsg(error?.response?.data?.message[0]);
-    else return formatErrorMsg(error?.response?.message);
+    if (Array.isArray(error)) return formatErrorMsg(error[0]);
+    else return formatErrorMsg(error);
   }
   return "Something went wrong";
 }

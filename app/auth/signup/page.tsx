@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import Axios from "@/lib/axios";
 import { getErrorMsg } from "@/utlis/error";
+import axios from "axios";
 
 type SignUpFormData = {
   email: string;
@@ -33,6 +34,7 @@ export default function SignUp() {
   const onSubmit = (data: SignUpFormData) => {
     mutate(data);
   };
+  const isError = axios.isAxiosError(error);
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-gray-100 px-4">
@@ -105,9 +107,9 @@ export default function SignUp() {
           >
             {isPending ? "Sending..." : "Sign Up"}
           </button>
-          {!!error && (
+          {isError && (
             <p className="text-sm font-semibold text-red-500">
-              {getErrorMsg(error)}
+              {getErrorMsg(error?.response?.data?.message)}
             </p>
           )}
         </form>

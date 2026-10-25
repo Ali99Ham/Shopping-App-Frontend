@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { Providers } from "@/components/Providers";
+import { Providers } from "@/components/Providers/Providers";
+import { AuthProviderServer } from "@/components/Providers/AuthProviderServer";
 
 const robotoHeading = Roboto({
   subsets: ["latin"],
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
   description: "My Custom Shopping App",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -31,7 +32,9 @@ export default function RootLayout({
     >
       <body className="min-h-full m-0 flex flex-col">
         <main className="max-w-1399px px-2 lg:px-4">
-          <Providers>{children}</Providers>
+          <AuthProviderServer>
+            <Providers>{children}</Providers>
+          </AuthProviderServer>
         </main>
       </body>
     </html>
